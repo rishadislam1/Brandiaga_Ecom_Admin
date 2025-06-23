@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const baseURL = 'http://localhost:5147';
+export const baseURL = 'https://rishadislamm1-001-site1.rtempurl.com';
 // Create axios instance
 const axiosSecure = axios.create({
     baseURL: `${baseURL}/api`,

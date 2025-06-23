@@ -7,6 +7,8 @@ import inventoryReducer from './Slicers/InventorySlice.js';
 import userReducer from "./Slicers/UserSlice.js";
 import BannerReducer from "./Slicers/BannerSlice.js";
 import seoReducer from "./Slicers/SeoSlice.js";
+import OrderReducer from "./Slicers/OrderSlice.js";
+import ShippingReducer from "./Slicers/ShippingSlice.js";
 
 export default configureStore({
     reducer: {
@@ -16,6 +18,8 @@ export default configureStore({
         inventory: inventoryReducer,
         users: userReducer,
         banners: BannerReducer,
-        seo: seoReducer
+        seo: seoReducer,
+        orders: OrderReducer,
+        shippings: ShippingReducer
     },
 });

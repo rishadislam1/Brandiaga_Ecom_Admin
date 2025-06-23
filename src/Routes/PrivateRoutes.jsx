@@ -32,7 +32,7 @@ const PrivateRoutes = ({ children }) => {
     }, [dispatch]);
 
     if (!isAuthenticated) {
-        return <Navigate to="/" replace />;
+        return <Navigate to="/admin" replace />;
     }
 
     // ⬇️ Render passed children instead of <Outlet />

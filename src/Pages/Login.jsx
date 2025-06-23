@@ -14,7 +14,7 @@ const Login = () => {
     const [passwordError, setPasswordError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const isAuthenticated = !!localStorage.getItem('token');
-    const from = location.state?.from?.pathname || "/admin/dashboard";
+    const from = location.state?.from?.pathname || "/admin/admin/dashboard";
 
     const navigate = useNavigate();
 
@@ -57,7 +57,7 @@ const Login = () => {
             if(res.message === "Login Successfull" && res.data.roleName === "Admin"){
                 localStorage.setItem('token', res.data.token);
                 showSuccess("Successfully Login");
-                navigate('/admin')
+                navigate('/admin/admin')
             }else{
                 showError("You don't have permission to this portal.")
             }

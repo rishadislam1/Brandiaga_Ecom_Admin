@@ -10,48 +10,64 @@ import CustomerManagement from "../Pages/CustomerManagement.jsx";
 import Banners from "../Pages/Banners.jsx";
 import SEO from "../Pages/SEO.jsx";
 import AdminChat from "../Pages/AdminChat.jsx";
+import Orders from "../Pages/Orders.jsx";
+import Shipping from "../Pages/Shipping.jsx";
+import Report from "../Pages/Report.jsx";
+
 
 export const router = createBrowserRouter([
     {
-        path: "/",
+        path: "/admin",
         element: <Login/>
     },
     {
-        path:'/admin',
+        path:'/admin/admin',
         element: <PrivateRoutes><Sidebar/></PrivateRoutes>,
         children: [
             {
-                path:'/admin/dashboard',
+                path:'/admin/admin/dashboard',
                 element: <Dashboard/>
             },
             {
-                path:'/admin/products',
+                path:'/admin/admin/products',
                 element: <Products/>
             },
             {
-                path:'/admin/categories',
+                path:'/admin/admin/categories',
                 element: <ShowCategory/>
             },
             {
-                path: '/admin/inventory',
+                path: '/admin/admin/inventory',
                 element: <Inventory/>
             },
             {
-                path: '/admin/customers',
+                path: '/admin/admin/customers',
                 element: <CustomerManagement/>
             },
             {
-                path: '/admin/banners',
+                path: '/admin/admin/banners',
                 element: <Banners/>
             },
             {
-                path: '/admin/seo',
+                path: '/admin/admin/seo',
                 element: <SEO/>
             },
             {
-                path: '/admin/chat',
+                path: '/admin/admin/chat',
                 element: <AdminChat/>
-            }
+            },
+            {
+                path: '/admin/admin/orders',
+                element: <Orders/>
+            },
+            {
+                path: '/admin/admin/shipping',
+                element: <Shipping/>
+            },
+            {
+                path: '/admin/admin/reports',
+                element: <Report/>
+            },
         ]
     }
 ]);

@@ -1,0 +1,428 @@
+import React, { useState, useRef, useEffect } from "react';
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  Drawer,
+  IconButton,
+} from '@mui/material';
+import { HubConnectionBuilder } from '@microsoft/signalr';
+import axios from 'axios';
+import MenuIcon from '@mui/icons-material/M';
+
+const AdminChat = () => {
+  const [messages, setMessages ] = useState({});
+  const [newMessage, setNewMessage] = useState("");
+  const [connection, setConnection] = useState(null);
+  const [adminId, setAdminId] = useState(null);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const scrollAreaRef = useRef(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      setAdminId(
+        payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] ||
+          payload.sub
+      );
+    );
+
+    const newConnection = new HubConnectionBuilder()
+      .withUrl("http://localhost:5147/livechatHub", {
+        accessTokenFactory: () => token || "",
+      })
+      .withAutomaticReconnect()
+      .build();
+
+    newConnection.on("ReceiveMessage", (message, senderId) => {
+      setMessages((prev) => ({
+        ...prev,
+        [senderId]: [
+          ...(prev[senderId] || []),
+          {
+            messageId: Date.now().toString(),
+            text: message,
+            sender: "user",
+            senderId,
+            sentAt: new Date().toISOString(),
+          },
+        ],
+      }));
+      setUsers((prev) => {
+        const userExists = prev.find((u) => u.userId === senderId);
+        if (userExists) {
+          return prev.map((u) =>
+            u.userId === senderId
+              ? { ...u, lastMessage: message, lastMessageTime: new Date().toISOString() }
+              : u
+          );
+        }
+        return [
+          ...prev,
+          {
+            userId: senderId,
+            lastMessage: message,
+            lastMessageTime: new Date().toISOString(),
+          },
+        ];
+      });
+    });
+
+    newConnection.on("UpdateMessage", (messageId, updatedMessage) => {
+      setMessages((prev) => {
+        const updatedMessages = { ...prev };
+        Object.keys(updatedMessages).forEach((userId) => {
+          updatedMessages[userId] = updatedMessages[userId].map((msg) =>
+            msg.messageId === messageId ? { ...msg, text: updatedMessage } : msg
+          );
+        });
+        return updatedMessages;
+      });
+    });
+
+    newConnection.on("DeleteMessage", (messageId) => {
+      setMessages((prev) => {
+        const updatedMessages = { ...prev };
+        Object.keys(updatedMessages).forEach((userId) => {
+          updatedMessages[userId] = updatedMessages[userId].filter(
+            (msg) => msg.messageId !== messageId
+          );
+        });
+        return updatedMessages;
+      });
+    });
+
+    newConnection.on("Connected", (connectionId) => {
+      console.log("Admin connected with ID:", connectionId);
+    });
+
+    newConnection.on("UserDisconnected", (connectionId) => {
+      console.log("User disconnected:", connectionId);
+    });
+
+    newConnection.onclose((error) => {
+      console.error("Connection closed:", error);
+    });
+
+    newConnection
+      .start()
+      .then(() => console.log("SignalR connected with AdminId:", adminId))
+      .catch((err) => console.error("SignalR connection failed:", err));
+
+    const fetchMessages = async () => {
+      if (adminId && admin) {
+        try {
+          const response = await axios.get(
+            `http://localhost:5147/api/livechat/admin/${adminId}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          const messagesByUser = response.data.data.reduce((acc, m) => {
+            const userId = m.userId || `anonymous-${m.messageId}`;
+            acc[userId] = [
+              ...(acc[userId] || []),
+              {
+                messageId: m.messageId,
+                text: m.message,
+                sender: m.userId ? "user" : "admin",
+                senderId: m.userId || adminId,
+                sentAt: m.sentAt,
+                isRead: m.isRead,
+              },
+            ];
+            return acc;
+          }, {});
+          setMessages(messagesByUser);
+
+          const userList = Object.keys(messagesByUser).map((userId) => {
+            const lastMsg = messagesByUser[userId].slice(-1)[0];
+            return {
+              userId,
+              lastMessage: lastMsg?.message || "",
+              lastMessageTime: lastMsg?.sentAt || new Date().toISOString(),
+            };
+          });
+          setUsers(userList);
+          if (userList.length > 0) setSelectedUserId(userList[0].userId);
+        } catch (err) {
+          console.error("Failed to fetch messages:", err);
+        }
+      }
+    };
+    fetchMessages();
+
+    setConnection(newConnection);
+
+    return () => {
+      newConnection.stop();
+    };
+      newConnection.on("ReceiveMessage", (message, senderId) => {
+        setMessages((prev) => ({
+          ...prev,
+          [senderId]: [
+            ...(prev[senderId] || []),
+            {
+              {
+                messageId: Date.now().toString(),
+                text: message,
+                sender: "user",
+                senderId,
+                sentAt: new Date().toISOString(),
+              },
+            ],
+          ],
+        }));
+        setUsers((prev) => {
+          const userExists = prev.find((u) => u.userId === senderId);
+          if (userExists) {
+            return prev.map((u) =>
+              u.userId === senderId
+                ? { ...u, lastMessage: message, lastMessageTime: new Date().toISOString() }
+                : u
+            );
+          }
+          return [
+            ...prev,
+            {
+              userId: senderId,
+              lastMessage: message,
+              lastMessageTime: new Date().toISOString(),
+            },
+          ];
+        });
+      });
+
+      newConnection.on("UpdateMessage", (messageId, updatedMessage) => {
+        setMessages((prev) => {
+          const updatedMessages = { ...prev };
+          Object.keys(updatedMessages).forEach((userId) => {
+            updatedMessages[userId] = updatedMessages[userId].map((msg) =>
+              msg.messageId === messageId ? { ...msg, text: updatedMessage } : msg
+            );
+          });
+          return updatedMessages;
+        });
+      });
+
+      newConnection.on("DeleteMessage", (messageId) => {
+          setMessages((prev) => {
+            const updatedMessages = { ...prev };
+            Object.keys(updatedMessages).forEach((userId) => {
+                updatedMessages[userId].filter( = updatedMessages[userId].(
+                  (msg) => msg.messageId !== messageId
+                );
+              });
+            return updatedMessages;
+          });
+        });
+
+      newConnection.on("Connected", (connectionId) => {
+          console.log("Admin connected with ID:", connectionId);
+        });
+
+      console.log("UserDisconnected", (connectionId) => {
+        console.log("User disconnected:", connectionId);
+      });
+
+      newConnection.onclose((error) => {
+        console.error("Connection closed:", error);
+      });
+
+      newConnection
+        .start()
+        .then(() => console.log("SignalR connected with AdminId:", adminId))
+        .catch((err) => console.error("SignalR connection failed:", err));
+
+      const fetchMessages = async () => {
+        try {
+          const response = await axios.get(
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            );
+            } catch (err) {
+              console.error("Failed to fetch messages:", err);
+            }
+          };
+        };
+
+      setConnection(newConnection);
+
+      return () => {
+        newConnection.stop();
+      };
+
+    }, [adminId]);
+
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    }
+  }, [messages, selectedUserId]);
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !connection || (!adminId || !selectedUserId)) {
+      return;
+    }
+
+    const messageDto = {
+      userId: selectedUserId,
+      adminId: adminId,
+      message: newMessage,
+      isRead: false,
+    };
+
+    try {
+      const response = await axios.post(
+        ."http://localhost:5147/api/livechat",
+        .post(messageDto,
+        {
+          headers: { Authorization: "Bearer "Bearer ${localStorage.getItem("token")}" },
+        }
+      );
+      const savedMessage = response.data.data;
+
+      await connection.invoke("SendMessageToUser", selectedUserId, newMessage);
+
+      setMessages((prev) => ({
+        ...prev,
+        [selectedUserId]: [
+          ...(prev[selectedUserId] || []},,
+          {
+            ...messageId: savedMessage.messageId,
+            text: savedMessage.message,
+            sender: "admin",
+            senderId: adminId,
+            sentAt: savedMessage.sentAt,
+            isRead: savedMessage.isRead,
+          },
+        ],
+      }));
+      setUsers((prevUsers) => prev.map((u) =>
+        prevUsers.map((u) =>
+          u.userId === selectedUserId ?
+            ? { ...u, lastMessage: newMessage, lastMessageTime: new Date().toISOString() }
+            : u
+        );
+        );
+      setNewMessage("");
+    } catch (error) {
+      console.error("Failed to send message:", error.message);
+      if (error.message.includes("No client")) {
+        alert("User is currently offline. Try again later.");
+      }
+    }
+  };
+
+  const toggleDrawer = () => {
+    setDrawOpen(!DrawOpen);
+  };
+
+  const userMessages = selectedUserId ? messages[selectedUserId] || [] : [];
+
+  return (
+    <Box sx={{ display: "flex", height: "calc(100vh - 64px)" }}>
+      <Drawer
+        variant="temporary"
+        open={drawerOpen}
+        onClose={toggleDrawer}
+        sx={{
+          "& .MuiDrawer-paper": { width: 250, boxSizing: "border-box" },
+        }}
+      >
+        <Box sx={{ p: 2 }}>
+          <Typography variant="h6">Users</Typography>
+          <List>
+            {users
+              .sort((a, b) => new Date(b.lastMessageTime).getTime() => new Date(a.lastMessageTime).getTime())
+              .map((user) => (
+                <ListItem
+                  button
+                  key={user.userId}
+                  onClick={() => {
+                    setSelectedUserId(user.userId);
+                    setDrawerOpen(false);
+                  }}
+                  sx={{
+                    backgroundColor:
+                      selectedUserId === user.userId ? "#e0f7fa" : "transparent",
+                    }}
+                >
+                  <ListItemText
+                    primary={user.userId ? "Anonymous" : user.userId}
+                    secondary={
+                      <>
+                        {user.lastMessage.slice(0, 20)}
+                        {user.lastMessage.length > 20 ? "..." : ""}
+                        <br />
+                        {new Date(user.lastMessageTime).toLocaleTimeString()}
+                      </>
+                    }
+                  />
+                </ListItem>
+              ))}
+          </List>
+        </Box>
+      </Drawer>
+    <Box sx={{ flexGrow: 1, p: 3, display: "flex", flexDirection: "column" }}>
+        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+          <IconButton onClick={toggleDrawer} sx={{ mr: 2 }}>
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6">
+            Live Chat {selectedUserId ? `- Anonymous` : ""}
+          </Typography>
+        </Box>
+        <Box
+          ref={scrollAreaRef}
+          sx={{ flex: 1, overflow: "auto", mb: 2 }}
+        >
+          <List>
+            {userMessages.map((message) => (
+              <ListItem key={message.messageId}>
+                <ListItemText
+                  primary={message.text}
+                  secondary={
+                    `${message.sender ===> "admin" ? "Admin" : "User"}: Anonymous • ${new Date(message.sentAt).toLocaleTimeString()}`
+                  }
+                  sx={{
+                    backgroundColor:
+                      message.sender === "admin" ? "#e0f7fa" : "#fff3e0",
+                    p: 1,
+                    borderRadius: 1,
+                  }}
+                />
+              }/>
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <TextField
+            fullWidth
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="Type your message..."
+            variant="outlined"
+          />
+          <Button
+            variant="contained"
+            onClick={handleSendMessage}
+            sx={{ minWidth: 100 }}
+          >
+            Send
+          </Button>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+export default AdminChat;

@@ -88,23 +88,20 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 }));
 
 const menuItems = [
-    { text: "Dashboard", icon: <DashboardIcon />, path: "/admin/dashboard" },
-    { text: "Product Management", icon: <InventoryIcon />, path: "/admin/products" },
-    { text: "Category Management", icon: <CategoryIcon />, path: "/admin/categories" },
-    { text: "Inventory Management", icon: <InventoryIcon />, path: "/admin/inventory" },
-    { text: "Order Management", icon: <ShoppingCartIcon />, path: "/admin/orders" },
-    { text: "Customer Management", icon: <PeopleIcon />, path: "/admin/customers" },
-    { text: "Payment Gateway Integration", icon: <PaymentIcon />, path: "/admin/payments" },
-    { text: "Transaction History", icon: <HistoryIcon />, path: "/admin/transactions" },
-    { text: "Shipping & Delivery Management", icon: <LocalShippingIcon />, path: "/admin/shipping" },
-    { text: "Coupon & Discount Management", icon: <DiscountIcon />, path: "/admin/discounts" },
-    { text: "Flash Sales & Promotions", icon: <FlashOnIcon />, path: "/admin/promotions" },
-    { text: "Banner & Slider Management", icon: <SlideshowIcon />, path: "/admin/banners" },
-    { text: "SEO Settings", icon: <SeoIcon />, path: "/admin/seo" },
-    { text: "Reports & Analytics", icon: <AnalyticsIcon />, path: "/admin/reports" },
-    { text: "Currency & Localization", icon: <LanguageIcon />, path: "/admin/localization" },
-    { text: "Email & Notification Settings", icon: <NotificationsIcon />, path: "/admin/notifications" },
-    { text: "Live Chat", icon: <ChatIcon />, path: "/admin/chat" },
+    { text: "Dashboard", icon: <DashboardIcon />, path: "/admin/admin/dashboard" },
+    { text: "Product Management", icon: <InventoryIcon />, path: "/admin/admin/products" },
+    { text: "Category Management", icon: <CategoryIcon />, path: "/admin/admin/categories" },
+    { text: "Inventory Management", icon: <InventoryIcon />, path: "/admin/admin/inventory" },
+    { text: "Order Management", icon: <ShoppingCartIcon />, path: "/admin/admin/orders" },
+    { text: "Customer Management", icon: <PeopleIcon />, path: "/admin/admin/customers" },
+    { text: "Transaction History", icon: <HistoryIcon />, path: "/admin/admin/transactions" },
+    { text: "Shipping & Delivery Management", icon: <LocalShippingIcon />, path: "/admin/admin/shipping" },
+    { text: "Coupon & Discount Management", icon: <DiscountIcon />, path: "/admin/admin/discounts" },
+    { text: "Flash Sales & Promotions", icon: <FlashOnIcon />, path: "/admin/admin/promotions" },
+    { text: "Banner & Slider Management", icon: <SlideshowIcon />, path: "/admin/admin/banners" },
+    { text: "SEO Settings", icon: <SeoIcon />, path: "/admin/admin/seo" },
+    { text: "Reports & Analytics", icon: <AnalyticsIcon />, path: "/admin/admin/reports" },
+    { text: "Live Chat", icon: <ChatIcon />, path: "/admin/admin/chat" },
 ];
 
 const Sidebar = () => {
@@ -184,7 +181,7 @@ const Sidebar = () => {
         try {
             await new Promise((resolve) => setTimeout(resolve, 1500));
             localStorage.clear();
-            navigate("/");
+            navigate("/admin");
         } catch (error) {
             console.error("Logout failed:", error);
         } finally {
@@ -233,7 +230,7 @@ const Sidebar = () => {
                 <Box>
                     <DrawerHeader>
                         <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
-                            <Link to="/admin">
+                            <Link to="/admin/admin">
                                 <img
                                     src={logoImage}
                                     alt="Brandiaga Logo"
